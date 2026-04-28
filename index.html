@@ -3,26 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema SIGET - DER-MG</title>
+    <title>SIGET - Sistema de Acesso</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background-color: #f4f7f9; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
         header { position: absolute; top: 0; left: 0; width: 100%; padding: 15px 30px; display: flex; align-items: center; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         .logo { height: 45px; margin-right: 15px; }
         .equipe-nome { font-size: 1.1rem; font-weight: bold; color: #244169; border-left: 2px solid #244169; padding-left: 15px; }
-        
         .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 90%; max-width: 400px; text-align: center; }
         h2 { color: #244169; margin-bottom: 20px; }
         input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 6px; outline: none; }
-        input:focus { border-color: #244169; }
-        
         .btn-main { width: 100%; padding: 12px; background: #244169; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-bottom: 10px; }
-        .btn-secondary { background: none; border: none; color: #244169; cursor: pointer; font-size: 0.9rem; text-decoration: underline; }
-        
-        #msg { margin-top: 10px; font-size: 0.9rem; min-height: 20px; }
-        .erro { color: #d9534f; }
-        .sucesso { color: #5cb85c; }
-        
+        .btn-link { background: none; border: none; color: #244169; cursor: pointer; text-decoration: underline; font-size: 0.9rem; }
+        #msg { margin-top: 10px; font-size: 0.9rem; min-height: 20px; color: #d9534f; }
         iframe { display: none; width: 100vw; height: 100vh; border: none; position: fixed; top: 0; left: 0; z-index: 9999; }
     </style>
 </head>
@@ -35,18 +28,18 @@
 
     <div class="container" id="box-login">
         <h2>SIGET - Login</h2>
-        <input type="text" id="login-cpf" placeholder="Digite seu CPF (apenas números)">
-        <button class="btn-main" onclick="validarLogin()">Entrar no Painel</button>
-        <button class="btn-secondary" onclick="alternar(true)">Não tem cadastro? Clique aqui</button>
-        <p id="msg-login" class="erro"></p>
+        <input type="text" id="login-cpf" placeholder="CPF (apenas números)">
+        <button class="btn-main" onclick="validarLogin()">Entrar</button>
+        <button class="btn-link" onclick="mostrarTela('box-cadastro')">Não tenho cadastro</button>
+        <p id="msg-login"></p>
     </div>
 
     <div class="container" id="box-cadastro" style="display:none;">
         <h2>SIGET - Cadastro</h2>
         <input type="text" id="cad-nome" placeholder="Nome Completo">
         <input type="text" id="cad-cpf" placeholder="CPF (apenas números)">
-        <button class="btn-main" onclick="cadastrarUsuario()">Finalizar Cadastro</button>
-        <button class="btn-secondary" onclick="alternar(false)">Já sou cadastrado</button>
+        <button class="btn-main" onclick="realizarCadastro()">Cadastrar</button>
+        <button class="btn-link" onclick="mostrarTela('box-login')">Voltar para Login</button>
         <p id="msg-cad"></p>
     </div>
 
@@ -57,73 +50,63 @@
         const SURVEY_ID = "554f8f6ad3a4426b881de70fdbf75058";
         const portalURL = "https://observatorio.infraestrutura.mg.gov.br/portal";
 
-        // Alterna entre as telas
-        function alternar(isCadastro) {
-            document.getElementById('box-login').style.display = isCadastro ? 'none' : 'block';
-            document.getElementById('box-cadastro').style.display = isCadastro ? 'block' : 'none';
+        function mostrarTela(id) {
+            document.getElementById('box-login').style.display = id === 'box-login' ? 'block' : 'none';
+            document.getElementById('box-cadastro').style.display = id === 'box-cadastro' ? 'block' : 'none';
         }
 
-        // 1. FUNÇÃO DE LOGIN (Verifica se existe no banco)
         async function validarLogin() {
             const cpf = document.getElementById('login-cpf').value;
             const msg = document.getElementById('msg-login');
-            
             if(!cpf) { msg.innerText = "Informe o CPF."; return; }
 
-            msg.className = ""; msg.innerText = "Validando...";
+            msg.style.color = "blue";
+            msg.innerText = "Validando...";
 
             try {
-                // Busca o CPF exato na planilha
-                const busca = await fetch(`${API_URL}/search?cpf=${cpf}`);
-                const usuarios = await busca.json();
+                // BUSCA o usuário pelo CPF na sua planilha
+                const response = await fetch(`${API_URL}/search?cpf=${cpf}`);
+                const data = await response.json();
 
-                if (usuarios.length > 0) {
-                    const usuario = usuarios[0];
-                    abrirSurvey(usuario.nome, usuario.cpf);
+                if(data.length > 0) {
+                    // Usuário encontrado!
+                    iniciarPainel(data[0].nome, data[0].cpf);
                 } else {
-                    msg.className = "erro";
-                    msg.innerText = "CPF não encontrado no sistema.";
+                    msg.style.color = "#d9534f";
+                    msg.innerText = "CPF não cadastrado.";
                 }
-            } catch (e) { msg.innerText = "Erro ao conectar."; }
+            } catch (e) { msg.innerText = "Erro na conexão."; }
         }
 
-        // 2. FUNÇÃO DE CADASTRO (Salva no banco)
-        async function cadastrarUsuario() {
+        async function realizarCadastro() {
             const nome = document.getElementById('cad-nome').value;
             const cpf = document.getElementById('cad-cpf').value;
             const msg = document.getElementById('msg-cad');
 
             if(!nome || !cpf) { msg.innerText = "Preencha todos os campos."; return; }
 
-            msg.innerText = "Enviando...";
-
             try {
-                // Verifica se já existe antes de cadastrar
+                // Verifica se já existe antes de criar
                 const check = await fetch(`${API_URL}/search?cpf=${cpf}`);
-                const existe = await check.json();
-                
-                if(existe.length > 0) {
-                    msg.className = "erro";
-                    msg.innerText = "Este CPF já está cadastrado!";
-                    return;
-                }
+                const user = await check.json();
+                if(user.length > 0) { msg.innerText = "CPF já existe!"; return; }
 
+                // CRIA o novo usuário (POST)
                 await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ data: [{ nome, cpf }] })
                 });
 
-                msg.className = "sucesso";
-                msg.innerText = "Cadastro realizado! Agora faça login.";
-                setTimeout(() => alternar(false), 2000);
-            } catch (e) { msg.innerText = "Erro ao salvar."; }
+                msg.style.color = "green";
+                msg.innerText = "Cadastrado! Faça login agora.";
+                setTimeout(() => mostrarTela('box-login'), 1500);
+            } catch (e) { msg.innerText = "Erro ao cadastrar."; }
         }
 
-        function abrirSurvey(nome, cpf) {
+        function iniciarPainel(nome, cpf) {
             document.getElementById("box-login").style.display = "none";
             document.getElementById("main-header").style.display = "none";
-            
             const url = `https://survey123.arcgis.com/share/${SURVEY_ID}?portalUrl=${portalURL}&field:login_nome=${encodeURIComponent(nome)}&field:login_cpf=${cpf}`;
             const frame = document.getElementById("frame-survey");
             frame.src = url;
