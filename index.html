@@ -47,7 +47,7 @@
 
     <script>
         const API_URL = "https://sheetdb.io/api/v1/ewlcyvb4tjl4m";
-        // URL do seu Experience Builder (Sem o &draft=true para garantir acesso público)
+        // URL do seu Experience Builder (Sem draft para evitar bloqueio)
         const DASHBOARD_URL = "https://observatorio.infraestrutura.mg.gov.br/portal/apps/experiencebuilder/experience/?id=e9ca77b1a7694f519bae33e8133ee6ca";
 
         function mostrarTela(id) {
@@ -68,13 +68,15 @@
                 const data = await response.json();
 
                 if(data.length > 0) {
-                    // Usuário encontrado! Chama o Dashboard
                     iniciarPainel();
                 } else {
                     msg.style.color = "#d9534f";
                     msg.innerText = "CPF não cadastrado.";
                 }
-            } catch (e) { msg.style.color = "#d9534f"; msg.innerText = "Erro na conexão."; }
+            } catch (e) { 
+                msg.style.color = "#d9534f"; 
+                msg.innerText = "Erro na conexão."; 
+            }
         }
 
         async function realizarCadastro() {
@@ -87,7 +89,11 @@
             try {
                 const check = await fetch(`${API_URL}/search?cpf=${cpf}`);
                 const user = await check.json();
-                if(user.length > 0) { msg.style.color = "#d9534f"; msg.innerText = "CPF já existe!"; return; }
+                if(user.length > 0) { 
+                    msg.style.color = "#d9534f"; 
+                    msg.innerText = "CPF já existe!"; 
+                    return; 
+                }
 
                 await fetch(API_URL, {
                     method: 'POST',
@@ -98,15 +104,16 @@
                 msg.style.color = "green";
                 msg.innerText = "Cadastrado! Faça login agora.";
                 setTimeout(() => mostrarTela('box-login'), 1500);
-            } catch (e) { msg.style.color = "#d9534f"; msg.innerText = "Erro ao cadastrar."; }
+            } catch (e) { 
+                msg.style.color = "#d9534f"; 
+                msg.innerText = "Erro ao cadastrar."; 
+            }
         }
 
         function iniciarPainel() {
-            // Esconde os elementos de login e cabeçalho
             document.getElementById("box-login").style.display = "none";
             document.getElementById("main-header").style.display = "none";
             
-            // Ativa o iframe com o link do Experience Builder
             const frame = document.getElementById("frame-dashboard");
             frame.src = DASHBOARD_URL;
             frame.style.display = "block";
