@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Login SIGET</title>
+    <style>
+ {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+        background-color: #f4f7f9;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden; /* Evita rolagem desnecessária na tela de login */
+    }
+
+    /* Cabeçalho / Identidade Visual */
+    header {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        padding: 20px 40px;
+        display: flex;
+        align-items: center;
+        background-color: white;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .logo {
+        height: 50px;
+        margin-right: 15px;
+    }
+
+    .equipe-nome {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #244169;
+        border-left: 2px solid #244169;
+        padding-left: 15px;
+    }
+
+    /* Container de Login */
+    .container {
+        background-color: white;
+        padding: 40px;
+        border-radius: 8px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        width: 100%;
+        max-width: 400px;
+        text-align: center;
+        z-index: 1;
+    }
+
+    h2 {
+        color: #244169;
+        margin-bottom: 30px;
+        font-size: 1.8rem;
+    }
+
+    /* Inputs */
+    input {
+        width: 100%;
+        padding: 12px 15px;
+        margin-bottom: 20px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        outline: none;
+        transition: border-color 0.3s;
+    }
+
+    input:focus {
+        border-color: #244169;
+    }
+
+    /* Botão */
+    button {
+        width: 100%;
+        padding: 12px;
+        background-color: #244169;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.3s, transform 0.1s;
+    }
+
+    button:hover {
+        background-color: #1a3150;
+    }
+
+    button:active {
+        transform: scale(0.98);
+    }
+
+    button:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+    }
+
+    /* Mensagem de Erro */
+    #erro {
+        color: #d9534f;
+        margin-top: 15px;
+        font-size: 0.9rem;
+        min-height: 20px;
+    }
+
+    /* Iframe (Tela Cheia após login) */
+    #frame {
+        display: none;
+        width: 100vw;
+        height: 100vh;
+        border: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 9999;
+    }
+        </style>
+</head>
+<body>
+
+    <header id="main-header">
+        <img src="https://www.der.mg.gov.br/images/1-diretorias/Comunicacao/logomarca-der-edificacoes-cor-reduzida.png" alt="Logo" class="logo">
+        <div class="equipe-nome">Assessoria de Gestão Estratégica</div>
+    </header>
+
+    <div class="container" id="login-card">
+        <h2>SIGET - Acesso</h2>
+        <input id="usuario" placeholder="Nome Completo">
+        <input id="cpf" placeholder="CPF (apenas números)">
+        <button onclick="login()">Entrar</button>
+        <p id="erro"></p>
+    </div>
+
+    <iframe id="frame"></iframe>
+
+    <script>
+        // Configurações das APIs
+        const API_URL = "https://sheetdb.io/api/v1/ewlcyvb4tjl4m";
+        const SURVEY_ID = "554f8f6ad3a4426b881de70fdbf75058"; // Troque pelo ID do seu Survey
+
+        async function login() {
+            const btn = document.querySelector("button");
+            const erroMsg = document.getElementById("erro");
+            const nomeInput = document.getElementById("usuario").value;
+            const cpfInput = document.getElementById("cpf").value;
+
+            // Validação simples de preenchimento
+            if (!nomeInput || !cpfInput) {
+                erroMsg.innerText = "Por favor, preencha Nome e CPF.";
+                return;
+            }
+
+            btn.innerText = "Carregando...";
+            btn.disabled = true;
+
+            try {
+                // 1. Envia os dados de acesso para o Google Sheets via SheetDB
+                const resposta = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ data: [{ nome: nomeInput, cpf: cpfInput }] })
+                });
+
+                if (resposta.ok) {
+                    // 2. Esconde os elementos de login
+                    document.getElementById("login-card").style.display = "none";
+                    document.getElementById("main-header").style.display = "none";
+
+                    // 'login_nome' e 'login_cpf' devem ser os nomes das colunas no seu XLSForm
+                    // 3. Monta a URL parametrizada para o Survey123 (Web Form)
+                    const portalURL = "https://observatorio.infraestrutura.mg.gov.br/portal";
+
+                    const surveyURL = `https://survey123.arcgis.com/share/${SURVEY_ID}?portalUrl=${portalURL}&field:login_nome=${encodeURIComponent(nomeInput)}&field:login_cpf=${cpfInput}`;
+
+                    // 4. Exibe o formulário no Iframe
+                    const frame = document.getElementById("frame");
+                    frame.src = surveyURL;
+                    frame.style.display = "block";
+                } else {
+                    throw new Error("Erro ao salvar dados.");
+                }
+
+            } catch (error) {
+                console.error("Erro na API:", error);
+                erroMsg.innerText = "Erro ao conectar com o banco de dados.";
+                btn.innerText = "Entrar";
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
