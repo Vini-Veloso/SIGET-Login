@@ -15,7 +15,7 @@
         input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 6px; outline: none; }
         .btn-main { width: 100%; padding: 12px; background: #244169; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-bottom: 10px; }
         .btn-link { background: none; border: none; color: #244169; cursor: pointer; text-decoration: underline; font-size: 0.9rem; }
-        #msg { margin-top: 10px; font-size: 0.9rem; min-height: 20px; color: #d9534f; }
+        #msg-login, #msg-cad { margin-top: 10px; font-size: 0.9rem; min-height: 20px; }
         iframe { display: none; width: 100vw; height: 100vh; border: none; position: fixed; top: 0; left: 0; z-index: 9999; }
     </style>
 </head>
@@ -43,12 +43,12 @@
         <p id="msg-cad"></p>
     </div>
 
-    <iframe id="frame-survey"></iframe>
+    <iframe id="frame-dashboard"></iframe>
 
     <script>
         const API_URL = "https://sheetdb.io/api/v1/ewlcyvb4tjl4m";
-        const SURVEY_ID = "f9cc72e9f92f48e79e61207c78297b66";
-        const portalURL = "https://observatorio.infraestrutura.mg.gov.br/portal";
+        // URL do seu Experience Builder (Sem o &draft=true para garantir acesso público)
+        const DASHBOARD_URL = "https://observatorio.infraestrutura.mg.gov.br/portal/apps/experiencebuilder/experience/?id=e9ca77b1a7694f519bae33e8133ee6ca";
 
         function mostrarTela(id) {
             document.getElementById('box-login').style.display = id === 'box-login' ? 'block' : 'none';
@@ -58,24 +58,23 @@
         async function validarLogin() {
             const cpf = document.getElementById('login-cpf').value;
             const msg = document.getElementById('msg-login');
-            if(!cpf) { msg.innerText = "Informe o CPF."; return; }
+            if(!cpf) { msg.style.color = "#d9534f"; msg.innerText = "Informe o CPF."; return; }
 
             msg.style.color = "blue";
             msg.innerText = "Validando...";
 
             try {
-                // BUSCA o usuário pelo CPF na sua planilha
                 const response = await fetch(`${API_URL}/search?cpf=${cpf}`);
                 const data = await response.json();
 
                 if(data.length > 0) {
-                    // Usuário encontrado!
-                    iniciarPainel(data[0].nome, data[0].cpf);
+                    // Usuário encontrado! Chama o Dashboard
+                    iniciarPainel();
                 } else {
                     msg.style.color = "#d9534f";
                     msg.innerText = "CPF não cadastrado.";
                 }
-            } catch (e) { msg.innerText = "Erro na conexão."; }
+            } catch (e) { msg.style.color = "#d9534f"; msg.innerText = "Erro na conexão."; }
         }
 
         async function realizarCadastro() {
@@ -83,15 +82,13 @@
             const cpf = document.getElementById('cad-cpf').value;
             const msg = document.getElementById('msg-cad');
 
-            if(!nome || !cpf) { msg.innerText = "Preencha todos os campos."; return; }
+            if(!nome || !cpf) { msg.style.color = "#d9534f"; msg.innerText = "Preencha todos os campos."; return; }
 
             try {
-                // Verifica se já existe antes de criar
                 const check = await fetch(`${API_URL}/search?cpf=${cpf}`);
                 const user = await check.json();
-                if(user.length > 0) { msg.innerText = "CPF já existe!"; return; }
+                if(user.length > 0) { msg.style.color = "#d9534f"; msg.innerText = "CPF já existe!"; return; }
 
-                // CRIA o novo usuário (POST)
                 await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -101,15 +98,17 @@
                 msg.style.color = "green";
                 msg.innerText = "Cadastrado! Faça login agora.";
                 setTimeout(() => mostrarTela('box-login'), 1500);
-            } catch (e) { msg.innerText = "Erro ao cadastrar."; }
+            } catch (e) { msg.style.color = "#d9534f"; msg.innerText = "Erro ao cadastrar."; }
         }
 
-        function iniciarPainel(nome, cpf) {
+        function iniciarPainel() {
+            // Esconde os elementos de login e cabeçalho
             document.getElementById("box-login").style.display = "none";
             document.getElementById("main-header").style.display = "none";
-            const url = `https://survey123.arcgis.com/share/${SURVEY_ID}?portalUrl=${portalURL}&field:login_nome=${encodeURIComponent(nome)}&field:login_cpf=${cpf}`;
-            const frame = document.getElementById("frame-survey");
-            frame.src = url;
+            
+            // Ativa o iframe com o link do Experience Builder
+            const frame = document.getElementById("frame-dashboard");
+            frame.src = DASHBOARD_URL;
             frame.style.display = "block";
         }
     </script>
