@@ -23,10 +23,3 @@ O projeto atua como um *middleware* de segurança, permitindo que apenas técnic
 3.  **Se autorizado:** O card de login é ocultado e o Dashboard do ArcGIS é carregado dinamicamente no `iframe`.
 4.  **Se não autorizado:** O sistema exibe um alerta e oferece a opção de cadastro.
 
-## ⚙️ Configuração Técnica
-
-Para replicar este projeto, é necessário configurar as seguintes constantes no arquivo `index.html`:
-
-```javascript
-const API_URL = "SUA_URL_DO_SHEETDB";
-const DASHBOARD_URL = "LINK_PUBLICO_DO_EXPERIENCE_BUILDER";
