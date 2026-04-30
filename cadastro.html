@@ -124,6 +124,10 @@ function limparCPF(cpf) {
     return cpf.replace(/[^\d]+/g, '');
 }
 
+function normalizarNome(nome) {
+    return nome.trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
 function validarCPF(cpf) {
     cpf = limparCPF(cpf);
 
@@ -143,6 +147,7 @@ async function cadastrar() {
     const usuario = document.getElementById("usuario").value.trim();
     const cpf = limparCPF(document.getElementById("cpf").value);
     const msgElement = document.getElementById("msg");
+    const botao = document.querySelector("button");
 
     if (!usuario || !cpf) {
         msgElement.innerText = "Preencha todos os campos!";
@@ -156,15 +161,35 @@ async function cadastrar() {
         return;
     }
 
-    msgElement.innerText = "Verificando CPF...";
+    msgElement.innerText = "Verificando cadastro...";
     msgElement.style.color = "#1f3c88";
+    botao.disabled = true;
+    botao.innerText = "Aguarde...";
 
     try {
-        const consulta = await fetch(`${API_URL}/search?cpf=${cpf}`);
+        const consulta = await fetch(API_URL);
         const dados = await consulta.json();
 
-        if (dados.length > 0) {
+        const nomeDigitado = normalizarNome(usuario);
+
+        const cpfJaExiste = dados.some(item => {
+            const cpfPlanilha = limparCPF(String(item.cpf || ""));
+            return cpfPlanilha === cpf;
+        });
+
+        if (cpfJaExiste) {
             msgElement.innerText = "Este CPF já está cadastrado!";
+            msgElement.style.color = "red";
+            return;
+        }
+
+        const nomeJaExiste = dados.some(item => {
+            const nomePlanilha = normalizarNome(String(item.nome || ""));
+            return nomePlanilha === nomeDigitado;
+        });
+
+        if (nomeJaExiste) {
+            msgElement.innerText = "Este nome já está cadastrado!";
             msgElement.style.color = "red";
             return;
         }
@@ -197,6 +222,9 @@ async function cadastrar() {
     } catch (err) {
         msgElement.innerText = "Erro ao realizar cadastro.";
         msgElement.style.color = "red";
+    } finally {
+        botao.disabled = false;
+        botao.innerText = "Cadastrar";
     }
 }
 </script>
