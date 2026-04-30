@@ -1,4 +1,4 @@
-# SIGET 
+# SIGET – Sistema de Gestão de Educação para o Trânsito 🚦
 
 Este repositório contém o sistema de **Controle de Acesso Personalizado** desenvolvido para o dashboard do SIGET feito pela Assessoria de Gestão Estratégica do **DER-MG**.
 
