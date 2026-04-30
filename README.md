@@ -1,32 +1,53 @@
-🛡️ SIGET - Portal de Autenticação e Gestão de Acesso
-Este repositório hospeda o middleware de segurança e a interface de usuário para o Sistema de Gestão de Transportes (SIGET), desenvolvido para a Assessoria de Gestão Estratégica do DER-MG. O projeto atua como uma camada de proteção para garantir que apenas técnicos autorizados acessem os dados sensíveis hospedados no ArcGIS Experience Builder.
+# SIGET 
 
-🚀 Funcionalidades Principais
-Autenticação de Segurança: Validação de CPF via consulta assíncrona para permitir o acesso ao dashboard.
+Este repositório contém o sistema de **Controle de Acesso Personalizado** desenvolvido para o dashboard do SIGET feito pela Assessoria de Gestão Estratégica do **DER-MG**.
 
-Auto-Cadastro: Interface amigável para que novos técnicos registrem Nome e CPF diretamente na base de dados.
+O projeto atua como um *middleware* de segurança, permitindo que apenas técnicos cadastrados acessem o painel de monitoramento no ArcGIS Experience Builder.
 
-Log de Acessos: Registro automático de auditoria para cada autenticação bem-sucedida.
+---
 
-Integração ArcGIS: Carregamento dinâmico e seguro do Experience Builder em ambiente de iframe após a validação.
+## 🎯 Objetivo
+O principal objetivo deste sistema é garantir a integridade e a confidencialidade dos dados de transporte, restringindo o acesso aos painéis de monitoramento apenas a profissionais autorizados mediante autenticação por CPF.
 
-Design Responsivo: Interface otimizada para operação em desktops e dispositivos móveis.
+---
 
-🛠️ Tecnologias Utilizadas
-Front-end: HTML5, CSS3 e JavaScript Vanilla.
+## 🚀 Funcionalidades Principais
 
-Banco de Dados: Google Sheets integrado via API SheetDB.
+* **Validação de CPF:** Consulta em tempo real via API para verificar se o usuário está autorizado a acessar o sistema.
+* **Auto-Cadastro:** Interface dedicada (`Cadastro.html`) para que novos técnicos realizem o registro de seus dados.
+* **Log de Acessos:** Registro automático de quem acessou o sistema diretamente em uma planilha do Google Sheets.
+* **Integração ArcGIS:** Carregamento dinâmico e seguro do Experience Builder em ambiente de iframe após autenticação.
 
-Ecossistema GIS: ArcGIS Experience Builder e Survey123.
+---
 
-Hospedagem: Deploy contínuo via GitHub Pages.
+## 🖥️ Módulos do Sistema
 
-Integrações: Processamento de dados e middleware para compatibilidade GeoJSON.
+### 🔐 Tela de Login (`login.html`)
+A porta de entrada do sistema, onde o técnico insere o CPF para validação. É totalmente responsiva para funcionar em dispositivos móveis e desktops.
 
-📂 Estrutura do Projeto
-/SIGET-Login
-├── /assets            # Arquivos de estilo (CSS), scripts (JS) e imagens
-├── index.html         # Portal de Login (Página principal de autenticação)
-├── Cadastro.html      # Interface de registro de novos técnicos
-├── README.md          # Documentação técnica do repositório
-└── .gitignore         # Configurações de arquivos ignorados pelo Git
+### 📝 Tela de Cadastro (`Cadastro.html`)
+Página exclusiva para o registro de novos técnicos, permitindo a inserção de Nome e CPF na base de dados.
+
+---
+
+## 🛠️ Tecnologias Utilizadas
+
+* **Linguagens Front-end:** HTML5, CSS3 (Design Responsivo) e JavaScript Vanilla.
+* **Banco de Dados:** Google Sheets integrado via API [SheetDB](https://sheetdb.io/).
+* **Ecossistema GIS:** ArcGIS Experience Builder & Survey123.
+* **Hospedagem:** GitHub Pages.
+
+---
+
+## 📋 Como funciona o fluxo?
+
+1. **Acesso:** O usuário acessa a página de login e insere o CPF.
+2. **Consulta:** O JavaScript realiza um `GET` na API do **SheetDB** procurando pelo CPF informado na planilha.
+3. **Decisão:**
+    * **Se autorizado:** O formulário de login é ocultado e o Dashboard do ArcGIS é carregado no `iframe`.
+    * **Se não autorizado:** O sistema bloqueia o acesso e sugere o redirecionamento para a tela de cadastro.
+4. **Finalização:** Cada acesso autorizado gera um log automático para auditoria.
+
+---
+
+**Desenvolvido por Vinícius Veloso de Oliveira** | Assessoria de Gestão Estratégica - DER-MG.
