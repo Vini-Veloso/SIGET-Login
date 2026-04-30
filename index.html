@@ -14,8 +14,7 @@
         h2 { color: #244169; margin-bottom: 20px; }
         input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 6px; outline: none; }
         .btn-main { width: 100%; padding: 12px; background: #244169; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-bottom: 10px; }
-        .btn-link { background: none; border: none; color: #244169; cursor: pointer; text-decoration: underline; font-size: 0.9rem; }
-        #msg-login, #msg-cad { margin-top: 10px; font-size: 0.9rem; min-height: 20px; }
+        #msg-login { margin-top: 10px; font-size: 0.9rem; min-height: 20px; }
         iframe { display: none; width: 100vw; height: 100vh; border: none; position: fixed; top: 0; left: 0; z-index: 9999; }
     </style>
 </head>
@@ -30,35 +29,25 @@
         <h2>SIGET - Login</h2>
         <input type="text" id="login-cpf" placeholder="CPF (apenas números)">
         <button class="btn-main" onclick="validarLogin()">Entrar</button>
-        <button class="btn-link" onclick="mostrarTela('box-cadastro')">Não tenho cadastro</button>
         <p id="msg-login"></p>
-    </div>
-
-    <div class="container" id="box-cadastro" style="display:none;">
-        <h2>SIGET - Cadastro</h2>
-        <input type="text" id="cad-nome" placeholder="Nome Completo">
-        <input type="text" id="cad-cpf" placeholder="CPF (apenas números)">
-        <button class="btn-main" onclick="realizarCadastro()">Cadastrar</button>
-        <button class="btn-link" onclick="mostrarTela('box-login')">Voltar para Login</button>
-        <p id="msg-cad"></p>
     </div>
 
     <iframe id="frame-dashboard"></iframe>
 
     <script>
         const API_URL = "https://sheetdb.io/api/v1/ewlcyvb4tjl4m";
-        // URL do seu Experience Builder (Sem draft para evitar bloqueio)
-        const DASHBOARD_URL = "https://observatorio.infraestrutura.mg.gov.br/portal/apps/experiencebuilder/experience/?id=e9ca77b1a7694f519bae33e8133ee6ca";
 
-        function mostrarTela(id) {
-            document.getElementById('box-login').style.display = id === 'box-login' ? 'block' : 'none';
-            document.getElementById('box-cadastro').style.display = id === 'box-cadastro' ? 'block' : 'none';
-        }
+        const DASHBOARD_URL = "https://observatorio.infraestrutura.mg.gov.br/portal/apps/experiencebuilder/experience/?id=e9ca77b1a7694f519bae33e8133ee6ca";
 
         async function validarLogin() {
             const cpf = document.getElementById('login-cpf').value;
             const msg = document.getElementById('msg-login');
-            if(!cpf) { msg.style.color = "#d9534f"; msg.innerText = "Informe o CPF."; return; }
+
+            if (!cpf) {
+                msg.style.color = "#d9534f";
+                msg.innerText = "Informe o CPF.";
+                return;
+            }
 
             msg.style.color = "blue";
             msg.innerText = "Validando...";
@@ -67,53 +56,22 @@
                 const response = await fetch(`${API_URL}/search?cpf=${cpf}`);
                 const data = await response.json();
 
-                if(data.length > 0) {
+                if (data.length > 0) {
                     iniciarPainel();
                 } else {
                     msg.style.color = "#d9534f";
-                    msg.innerText = "CPF não cadastrado.";
+                    msg.innerText = "CPF não autorizado.";
                 }
-            } catch (e) { 
-                msg.style.color = "#d9534f"; 
-                msg.innerText = "Erro na conexão."; 
-            }
-        }
-
-        async function realizarCadastro() {
-            const nome = document.getElementById('cad-nome').value;
-            const cpf = document.getElementById('cad-cpf').value;
-            const msg = document.getElementById('msg-cad');
-
-            if(!nome || !cpf) { msg.style.color = "#d9534f"; msg.innerText = "Preencha todos os campos."; return; }
-
-            try {
-                const check = await fetch(`${API_URL}/search?cpf=${cpf}`);
-                const user = await check.json();
-                if(user.length > 0) { 
-                    msg.style.color = "#d9534f"; 
-                    msg.innerText = "CPF já existe!"; 
-                    return; 
-                }
-
-                await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ data: [{ nome, cpf }] })
-                });
-
-                msg.style.color = "green";
-                msg.innerText = "Cadastrado! Faça login agora.";
-                setTimeout(() => mostrarTela('box-login'), 1500);
-            } catch (e) { 
-                msg.style.color = "#d9534f"; 
-                msg.innerText = "Erro ao cadastrar."; 
+            } catch (e) {
+                msg.style.color = "#d9534f";
+                msg.innerText = "Erro na conexão.";
             }
         }
 
         function iniciarPainel() {
             document.getElementById("box-login").style.display = "none";
             document.getElementById("main-header").style.display = "none";
-            
+
             const frame = document.getElementById("frame-dashboard");
             frame.src = DASHBOARD_URL;
             frame.style.display = "block";
