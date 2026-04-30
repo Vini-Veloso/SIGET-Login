@@ -14,7 +14,7 @@ O principal objetivo deste sistema é garantir a integridade e a confidencialida
 ## 🚀 Funcionalidades Principais
 
 * **Validação de CPF:** Consulta em tempo real via API para verificar se o usuário está autorizado a acessar o sistema.
-* **Auto-Cadastro:** Interface dedicada (`Cadastro.html`) para que novos técnicos realizem o registro de seus dados.
+* **Auto-Cadastro:** Interface dedicada (`cadastro.html`) para que novos técnicos realizem o registro de seus dados.
 * **Log de Acessos:** Registro automático de quem acessou o sistema diretamente em uma planilha do Google Sheets.
 * **Integração ArcGIS:** Carregamento dinâmico e seguro do Experience Builder em ambiente de iframe após autenticação.
 
@@ -25,7 +25,7 @@ O principal objetivo deste sistema é garantir a integridade e a confidencialida
 ### 🔐 Tela de Login (`login.html`)
 A porta de entrada do sistema, onde o técnico insere o CPF para validação. É totalmente responsiva para funcionar em dispositivos móveis e desktops.
 
-### 📝 Tela de Cadastro (`Cadastro.html`)
+### 📝 Tela de Cadastro (`cadastro.html`)
 Página exclusiva para o registro de novos técnicos, permitindo a inserção de Nome e CPF na base de dados.
 
 ---
