@@ -103,7 +103,7 @@
 <body>
 
 <header class="header">
-    <h1> SIGET</h1>
+    <h1>SIGET</h1>
 </header>
 
 <div class="container">
@@ -120,20 +120,28 @@
 <script>
 const API_URL = "https://sheetdb.io/api/v1/ewlcyvb4tjl4m";
 
+function limparCPF(cpf) {
+    return cpf.replace(/[^\d]+/g, '');
+}
+
 function validarCPF(cpf) {
-    cpf = cpf.replace(/[^\d]+/g, '');
+    cpf = limparCPF(cpf);
+
     if (cpf.length !== 11 || !!cpf.match(/(\d)\1{10}/)) return false;
+
     const cpfDigits = cpf.split('').map(el => +el);
+
     const rest = (count) => {
-        return (cpfDigits.slice(0, count-12)
+        return (cpfDigits.slice(0, count - 12)
             .reduce((soma, el, index) => (soma + el * (count - index)), 0) * 10) % 11 % 10;
     };
+
     return rest(10) === cpfDigits[9] && rest(11) === cpfDigits[10];
 }
 
-function cadastrar() {
-    const usuario = document.getElementById("usuario").value;
-    const cpf = document.getElementById("cpf").value;
+async function cadastrar() {
+    const usuario = document.getElementById("usuario").value.trim();
+    const cpf = limparCPF(document.getElementById("cpf").value);
     const msgElement = document.getElementById("msg");
 
     if (!usuario || !cpf) {
@@ -148,31 +156,48 @@ function cadastrar() {
         return;
     }
 
-    fetch(API_URL, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            data: [
-                {
-                    nome: usuario,
-                    cpf: cpf
-                }
-            ]
-        })
-    })
-    .then(res => res.json())
-    .then(data => {
+    msgElement.innerText = "Verificando CPF...";
+    msgElement.style.color = "#1f3c88";
+
+    try {
+        const consulta = await fetch(`${API_URL}/search?cpf=${cpf}`);
+        const dados = await consulta.json();
+
+        if (dados.length > 0) {
+            msgElement.innerText = "Este CPF já está cadastrado!";
+            msgElement.style.color = "red";
+            return;
+        }
+
+        const resposta = await fetch(API_URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                data: [
+                    {
+                        nome: usuario,
+                        cpf: cpf
+                    }
+                ]
+            })
+        });
+
+        if (!resposta.ok) {
+            throw new Error("Erro ao cadastrar");
+        }
+
         msgElement.innerText = "Cadastrado com sucesso!";
-        msgElement.style.color = "green";   
+        msgElement.style.color = "green";
+
         document.getElementById("usuario").value = "";
         document.getElementById("cpf").value = "";
-    })
-    .catch(err => {
+
+    } catch (err) {
         msgElement.innerText = "Erro ao realizar cadastro.";
         msgElement.style.color = "red";
-    });
+    }
 }
 </script>
 
