@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro SIGET</title>
+
+    <style>
+    *{
+        margin:0;
+        padding:0;
+        box-sizing:border-box;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body{
+        height:100vh;
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        background:linear-gradient(135deg,#1f3c88,#0f2027);
+    }
+
+    .header{
+        position:absolute;
+        top:20px;
+        left:20px;
+        right:20px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+    }
+
+    .header h1{
+        color:white;
+        font-size:26px;
+        font-weight:bold;
+    }
+
+    .container{
+        width:380px;
+        background:white;
+        padding:40px;
+        border-radius:10px;
+        box-shadow:0 10px 25px rgba(0,0,0,0.25);
+        text-align:center;
+    }
+
+    .container h2{
+        margin-bottom:25px;
+        color:#1f3c88;
+    }
+
+    .container input{
+        width:100%;
+        padding:12px;
+        margin-bottom:15px;
+        border:1px solid #ccc;
+        border-radius:6px;
+        font-size:14px;
+        transition:0.3s;
+    }
+
+    .container input:focus{
+        outline:none;
+        border-color:#1f3c88;
+        box-shadow:0 0 5px rgba(31,60,136,0.3);
+    }
+
+    .container button{
+        width:100%;
+        padding:12px;
+        border:none;
+        border-radius:6px;
+        background:#1f3c88;
+        color:white;
+        font-size:16px;
+        cursor:pointer;
+        transition:0.3s;
+    }
+
+    .container button:hover{
+        background:#162d66;
+    }
+
+    #msg{
+        margin-top:15px;
+        color:green;
+        font-size:14px;
+    }
+
+    select {
+        width: 100%;
+        padding: 10px;
+        margin-top: 10px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        font-size: 14px;
+    }
+    </style>
+
+</head>
+<body>
+
+<header class="header">
+    <h1> SIGET</h1>
+</header>
+
+<div class="container">
+    <h2>Cadastrar Acesso</h2>
+    
+    <input id="usuario" placeholder="Usuário">
+    <input id="cpf" placeholder="CPF (somente números)" maxlength="14">
+
+    <button onclick="cadastrar()">Cadastrar</button>
+
+    <p id="msg"></p>
+</div>
+
+<script>
+const API_URL = "https://sheetdb.io/api/v1/ewlcyvb4tjl4m";
+
+function validarCPF(cpf) {
+    cpf = cpf.replace(/[^\d]+/g, '');
+    if (cpf.length !== 11 || !!cpf.match(/(\d)\1{10}/)) return false;
+    const cpfDigits = cpf.split('').map(el => +el);
+    const rest = (count) => {
+        return (cpfDigits.slice(0, count-12)
+            .reduce((soma, el, index) => (soma + el * (count - index)), 0) * 10) % 11 % 10;
+    };
+    return rest(10) === cpfDigits[9] && rest(11) === cpfDigits[10];
+}
+
+function cadastrar() {
+    const usuario = document.getElementById("usuario").value;
+    const cpf = document.getElementById("cpf").value;
+    const msgElement = document.getElementById("msg");
+
+    if (!usuario || !cpf) {
+        msgElement.innerText = "Preencha todos os campos!";
+        msgElement.style.color = "red";
+        return;
+    }
+
+    if (!validarCPF(cpf)) {
+        msgElement.innerText = "CPF Inválido!";
+        msgElement.style.color = "red";
+        return;
+    }
+
+    fetch(API_URL, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            data: [
+                {
+                    nome: usuario,
+                    cpf: cpf
+                }
+            ]
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        msgElement.innerText = "Cadastrado com sucesso!";
+        msgElement.style.color = "green";   
+        document.getElementById("usuario").value = "";
+        document.getElementById("cpf").value = "";
+    })
+    .catch(err => {
+        msgElement.innerText = "Erro ao realizar cadastro.";
+        msgElement.style.color = "red";
+    });
+}
+</script>
+
+</body>
+</html>
