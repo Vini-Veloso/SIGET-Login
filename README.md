@@ -1,55 +1,32 @@
 🛡️ SIGET - Portal de Autenticação e Gestão de Acesso
-Este repositório hospeda o middleware de segurança e a interface de usuário para o Sistema de Gestão de Transportes (SIGET), desenvolvido para a Assessoria de Gestão Estratégica do DER-MG. O sistema atua como uma camada de proteção para os dados sensíveis hospedados no ArcGIS Experience Builder.
+Este repositório hospeda o middleware de segurança e a interface de usuário para o Sistema de Gestão de Transportes (SIGET), desenvolvido para a Assessoria de Gestão Estratégica do DER-MG. O projeto atua como uma camada de proteção para garantir que apenas técnicos autorizados acessem os dados sensíveis hospedados no ArcGIS Experience Builder.
 
-📋 Sobre o Projeto
-O portal garante que apenas técnicos autorizados visualizem os painéis de monitoramento. A solução utiliza uma arquitetura leve baseada em tecnologias web modernas e integração com APIs de planilhas para gerenciamento dinâmico de usuários.
+🚀 Funcionalidades Principais
+Autenticação de Segurança: Validação de CPF via consulta assíncrona para permitir o acesso ao dashboard.
 
-🚀 Módulos do Sistema
-🔐 1. Tela de Login (index.html)
-A porta de entrada do sistema.
+Auto-Cadastro: Interface amigável para que novos técnicos registrem Nome e CPF diretamente na base de dados.
 
-Interface Responsiva: Desenvolvida em HTML5 e CSS3 para operação em desktops e dispositivos móveis.
+Log de Acessos: Registro automático de auditoria para cada autenticação bem-sucedida.
 
-Fluxo de Autenticação: O JavaScript realiza uma consulta assíncrona via API para validar o CPF e as permissões de acesso.
+Integração ArcGIS: Carregamento dinâmico e seguro do Experience Builder em ambiente de iframe após a validação.
 
-📝 2. Tela de Cadastro (Cadastro.html)
-Interface dedicada à integração de novos técnicos.
-
-Auto-Cadastro: Permite que novos usuários registrem nome e CPF diretamente na base de dados.
-
-Validação: Verifica campos obrigatórios antes do envio para garantir a integridade dos dados.
-
-🛡️ 3. Verificação de CPF e Segurança
-Integração SheetDB: Utiliza o Google Sheets como banco de dados NoSQL por meio da API SheetDB.
-
-Segurança de Iframe: O dashboard do ArcGIS só é exibido após a validação positiva da autenticação.
+Design Responsivo: Interface otimizada para operação em desktops e dispositivos móveis.
 
 🛠️ Tecnologias Utilizadas
 Front-end: HTML5, CSS3 e JavaScript Vanilla.
 
-Banco de Dados: Google Sheets via API SheetDB.
+Banco de Dados: Google Sheets integrado via API SheetDB.
 
 Ecossistema GIS: ArcGIS Experience Builder e Survey123.
 
-Hospedagem: GitHub Pages.
+Hospedagem: Deploy contínuo via GitHub Pages.
 
-Integrações: Middleware para processamento de dados GeoJSON.
+Integrações: Processamento de dados e middleware para compatibilidade GeoJSON.
 
-🔄 Fluxo de Operação
-Acesso: O técnico acessa o Portal de Login.
-
-Consulta: O sistema executa um GET no SheetDB filtrando pelo CPF inserido.
-
-Decisão:
-
-Autorizado: O formulário é substituído pelo dashboard interativo.
-
-Não Autorizado: O acesso é bloqueado e o usuário é direcionado para a Tela de Cadastro.
-
-Log: Registro automático de auditoria para cada acesso bem-sucedido.
-
-🏗️ Estrutura do Repositório
-├── index.html          # Portal de Login (Home)
-├── Cadastro.html       # Sistema de registro de técnicos
-├── README.md           # Documentação do projeto
-└── assets/             # Pasta para CSS, JS e Imagens
+📂 Estrutura do Projeto
+/SIGET-Login
+├── /assets            # Arquivos de estilo (CSS), scripts (JS) e imagens
+├── index.html         # Portal de Login (Página principal de autenticação)
+├── Cadastro.html      # Interface de registro de novos técnicos
+├── README.md          # Documentação técnica do repositório
+└── .gitignore         # Configurações de arquivos ignorados pelo Git
